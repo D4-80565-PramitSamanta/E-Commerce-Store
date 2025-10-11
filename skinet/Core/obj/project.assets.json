@@ -4685,11 +4685,11 @@
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\zentrumhub-user\\Desktop\\DEMO\\skinet\\Core\\Core.csproj",
+      "projectUniqueName": "C:\\Users\\zentrumhub-user\\Desktop\\E-Commerce-Store\\skinet\\Core\\Core.csproj",
       "projectName": "Core",
-      "projectPath": "C:\\Users\\zentrumhub-user\\Desktop\\DEMO\\skinet\\Core\\Core.csproj",
+      "projectPath": "C:\\Users\\zentrumhub-user\\Desktop\\E-Commerce-Store\\skinet\\Core\\Core.csproj",
       "packagesPath": "C:\\Users\\zentrumhub-user\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\zentrumhub-user\\Desktop\\DEMO\\skinet\\Core\\obj\\",
+      "outputPath": "C:\\Users\\zentrumhub-user\\Desktop\\E-Commerce-Store\\skinet\\Core\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"

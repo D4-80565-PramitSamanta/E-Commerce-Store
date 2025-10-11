@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "mppaomjiQ1o=",
+  "dgSpecHash": "ODJUS2kNIo8=",
   "success": true,
-  "projectFilePath": "C:\\Users\\zentrumhub-user\\Desktop\\DEMO\\skinet\\Core\\Core.csproj",
+  "projectFilePath": "C:\\Users\\zentrumhub-user\\Desktop\\E-Commerce-Store\\skinet\\Core\\Core.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\zentrumhub-user\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\zentrumhub-user\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
