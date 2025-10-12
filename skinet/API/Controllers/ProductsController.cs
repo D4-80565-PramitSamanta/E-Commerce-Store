@@ -1,7 +1,6 @@
 ﻿using Core.Entities;
-using Infrastructure.Data;
+using Core.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace API.Controllers
 {
@@ -9,56 +8,49 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
+        private readonly IProductRepository _productRepo;
 
-        public StoreContext context { get; }
-
-        public ProductsController(StoreContext context)
+        public ProductsController(IProductRepository productRepo)
         {
-            this.context = context;
+            _productRepo = productRepo;
         }
-
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts(string? brand, string? type, string? sort)
         {
-            return this.context.Products.ToList();
+            //var products = await _productRepo.GetProductsAsync();
+            var products = await _productRepo.GetProductsByFilter(brand, type, sort);
+            return Ok(products);
         }
-
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            var product = await this.context.Products.FindAsync(id);
+            var product = await _productRepo.GetProductByIdAsync(id);
 
             if (product == null)
-            {
-                return NotFound(); 
-            }
+                return NotFound();
 
-            return product;
+            return Ok(product);
         }
 
         [HttpPost]
         public async Task<ActionResult<Product>> CreateProduct(Product product)
         {
-            context.Products.Add(product);
+            _productRepo.AddProduct(product);
+            await _productRepo.SaveChangesAsync();
 
-            await this.context.SaveChangesAsync();
-
-            return Ok(product);
+            return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
         }
 
         [HttpPut("{id:int}")]
         public async Task<ActionResult> UpdateProduct(int id, Product product)
         {
-            if (id != product.Id || !productExists(id))
-            {
+            if (id != product.Id || !_productRepo.ProductExists(id))
                 return BadRequest();
-            }
 
-            context.Entry(product).State = EntityState.Modified;
-
-            await this.context.SaveChangesAsync();
+            _productRepo.UpdateProduct(product);
+            await _productRepo.SaveChangesAsync();
 
             return NoContent();
         }
@@ -66,22 +58,39 @@ namespace API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeleteProduct(int id)
         {
-            var product = await this.context.Products.FindAsync(id);
-            
-            if (product == null)
-            {
+            if (!_productRepo.ProductExists(id))
                 return NotFound();
-            }
-            context.Products.Remove(product);
 
-            await context.SaveChangesAsync();
+            _productRepo.DeleteProduct(id);
+            await _productRepo.SaveChangesAsync();
 
             return NoContent();
         }
 
-        private bool productExists(int id)
+        [HttpGet("brands")]
+        public async Task<ActionResult<IEnumerable<string>>> GetBrands()
         {
-            return context.Products.Any(x => x.Id == id);
+            var brands = await _productRepo.GetBrandsAsync();
+            return Ok(brands);
         }
+
+        [HttpGet("types")]
+        public async Task<ActionResult<IEnumerable<string>>> GetTypes()
+        {
+            var types = await _productRepo.GetTypesAsync();
+            return Ok(types);
+        }
+
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Product>>> GetProductsByFilter([FromQuery] string? brand, [FromQuery] string? type)
+        //{
+        //    var products = await _productRepo.GetProducts(brand, type);
+
+        //    if (products == null || !products.Any())
+        //        return NotFound("No products found matching the specified filters.");
+
+        //    return Ok(products);
+        //}
     }
 }
+    
