@@ -1,7 +1,6 @@
 ﻿using Core.Entities;
 using Core.Interfaces;
 using Core.Specifications;
-using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -18,9 +17,9 @@ namespace API.Controllers
         }
 
         [HttpGet("all")]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProducts(string? brand, string? type, string? sort)
+        public async Task<ActionResult<IEnumerable<Product>>> GetProducts([FromQuery] ProductSpecParams specParams)
         {
-            var spec = new ProductSpecification(brand, type, sort);
+            ProductSpecification spec = new ProductSpecification(specParams);
 
             var products = await _genericRepo.ListAsync(spec);
 
@@ -80,21 +79,23 @@ namespace API.Controllers
         [HttpGet("brands")]
         public async Task<ActionResult<IEnumerable<string>>> GetBrands()
         {
-            //var brands = await _genericRepo.GetBrandsAsync();
-            return Ok();
+            BrandListSpecification spec = new BrandListSpecification();
+            var brands = await _genericRepo.ListAsync<string>(spec);
+            return Ok(brands);
         }
 
         [HttpGet("types")]
         public async Task<ActionResult<IEnumerable<string>>> GetTypes()
         {
-            //var types = await _genericRepo.GetTypesAsync();
-            return Ok();
+            TypeListSpecification spec = new TypeListSpecification();
+            var types = await _genericRepo.ListAsync<string>(spec);
+            return Ok(types);
         }
 
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Product>>> GetProductsByFilter(string? brand, string? type, string? sort)
+        public async Task<ActionResult<IEnumerable<Product>>> GetProductsByFilter([FromQuery] ProductSpecParams specParams)
         {
-            ProductSpecification spec = new ProductSpecification(brand, type, sort);
+            ProductSpecification spec = new ProductSpecification(specParams);
             var product = await _genericRepo.GetEntityWithSpec(spec);
 
             if (product == null)

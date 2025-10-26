@@ -2,7 +2,7 @@
 
 namespace Core.Specifications
 {
-    internal class TypeListSpecification : BaseSpecification<Product, string>
+    public class TypeListSpecification : BaseSpecification<Product, string>
     {
         public TypeListSpecification()
         {
