@@ -1,5 +1,7 @@
 ﻿using Core.Entities;
 using Core.Interfaces;
+using Core.Specifications;
+using Infrastructure.Data;
 using Microsoft.AspNetCore.Mvc;
 
 namespace API.Controllers
@@ -8,25 +10,27 @@ namespace API.Controllers
     [Route("api/[controller]")]
     public class ProductsController : ControllerBase
     {
-        private readonly IProductRepository _productRepo;
+        private readonly IGenericRepository<Product> _genericRepo;
 
-        public ProductsController(IProductRepository productRepo)
+        public ProductsController(IGenericRepository<Product> genericRepo)
         {
-            _productRepo = productRepo;
+            _genericRepo = genericRepo;
         }
 
-        [HttpGet]
+        [HttpGet("all")]
         public async Task<ActionResult<IEnumerable<Product>>> GetProducts(string? brand, string? type, string? sort)
         {
-            //var products = await _productRepo.GetProductsAsync();
-            var products = await _productRepo.GetProductsByFilter(brand, type, sort);
+            var spec = new ProductSpecification(brand, type, sort);
+
+            var products = await _genericRepo.ListAsync(spec);
+
             return Ok(products);
         }
 
         [HttpGet("{id:int}")]
         public async Task<ActionResult<Product>> GetProduct(int id)
         {
-            var product = await _productRepo.GetProductByIdAsync(id);
+            var product = await _genericRepo.GetByIdAsync(id);
 
             if (product == null)
                 return NotFound();
@@ -37,8 +41,8 @@ namespace API.Controllers
         [HttpPost]
         public async Task<ActionResult<Product>> CreateProduct(Product product)
         {
-            _productRepo.AddProduct(product);
-            await _productRepo.SaveChangesAsync();
+            _genericRepo.Add(product);
+            await _genericRepo.SaveAllAsync();
 
             return CreatedAtAction(nameof(GetProduct), new { id = product.Id }, product);
         }
@@ -46,11 +50,11 @@ namespace API.Controllers
         [HttpPut("{id:int}")]
         public async Task<ActionResult> UpdateProduct(int id, Product product)
         {
-            if (id != product.Id || !_productRepo.ProductExists(id))
+            if (id != product.Id || !_genericRepo.Exists(id))
                 return BadRequest();
 
-            _productRepo.UpdateProduct(product);
-            await _productRepo.SaveChangesAsync();
+            _genericRepo.Update(product);
+            await _genericRepo.SaveAllAsync();
 
             return NoContent();
         }
@@ -58,39 +62,46 @@ namespace API.Controllers
         [HttpDelete("{id:int}")]
         public async Task<ActionResult> DeleteProduct(int id)
         {
-            if (!_productRepo.ProductExists(id))
+            var product = await _genericRepo.GetByIdAsync(id);
+            
+            if (product == null)
+            {
                 return NotFound();
+            }
+            _genericRepo.Remove(product);
 
-            _productRepo.DeleteProduct(id);
-            await _productRepo.SaveChangesAsync();
-
-            return NoContent();
+            if ( await _genericRepo.SaveAllAsync() == true)
+            {
+                return NoContent();
+            }
+            return BadRequest("Problem deleting product");
         }
 
         [HttpGet("brands")]
         public async Task<ActionResult<IEnumerable<string>>> GetBrands()
         {
-            var brands = await _productRepo.GetBrandsAsync();
-            return Ok(brands);
+            //var brands = await _genericRepo.GetBrandsAsync();
+            return Ok();
         }
 
         [HttpGet("types")]
         public async Task<ActionResult<IEnumerable<string>>> GetTypes()
         {
-            var types = await _productRepo.GetTypesAsync();
-            return Ok(types);
+            //var types = await _genericRepo.GetTypesAsync();
+            return Ok();
         }
 
-        //[HttpGet]
-        //public async Task<ActionResult<IEnumerable<Product>>> GetProductsByFilter([FromQuery] string? brand, [FromQuery] string? type)
-        //{
-        //    var products = await _productRepo.GetProducts(brand, type);
+        [HttpGet]
+        public async Task<ActionResult<IEnumerable<Product>>> GetProductsByFilter(string? brand, string? type, string? sort)
+        {
+            ProductSpecification spec = new ProductSpecification(brand, type, sort);
+            var product = await _genericRepo.GetEntityWithSpec(spec);
 
-        //    if (products == null || !products.Any())
-        //        return NotFound("No products found matching the specified filters.");
+            if (product == null)
+                return NotFound("No products found matching the specified filters.");
 
-        //    return Ok(products);
-        //}
+            return Ok(product);
+        }
     }
 }
     

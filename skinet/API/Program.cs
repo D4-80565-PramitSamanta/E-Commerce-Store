@@ -1,3 +1,4 @@
+using Core.Entities;
 using Core.Interfaces;
 using Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
@@ -11,8 +12,8 @@ builder.Services.AddDbContext<StoreContext>(opt =>
     opt.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
 
-builder.Services.AddTransient<IProductRepository,ProductRepository>();  
-
+builder.Services.AddTransient<IProductRepository,ProductRepository>();
+builder.Services.AddTransient<IGenericRepository<Product>, GenericRepository<Product>>();
 var app = builder.Build();
 
 app.MapControllers();
